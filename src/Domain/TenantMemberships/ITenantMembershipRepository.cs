@@ -26,6 +26,13 @@ public interface ITenantMembershipRepository
     Task<bool> ExistsAsync(Guid accountId, Guid idTenant, CancellationToken cancellationToken = default);
     Task<bool> ExistsOwnerByAccountIdAsync(Guid accountId, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// True if at least one ACTIVE membership is currently assigned to the
+    /// given department in the tenant. Used by the deactivate-department
+    /// pre-check to block orphaning members.
+    /// </summary>
+    Task<bool> HasActiveMembersInDepartmentAsync(Guid tenantId, Guid departmentId, CancellationToken cancellationToken = default);
+
     Task<FinFlow.Domain.Entities.TenantMembership?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
 
     void Add(FinFlow.Domain.Entities.TenantMembership membership);

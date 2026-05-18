@@ -496,6 +496,7 @@ public class ExportPaymentsToBankCsvCommandHandlerTests
         public Task<IReadOnlyList<TenantMembershipSummary>> GetByTenantIdAsync(Guid idTenant, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<bool> ExistsAsync(Guid accountId, Guid idTenant, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<bool> ExistsOwnerByAccountIdAsync(Guid accountId, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<bool> HasActiveMembersInDepartmentAsync(Guid tenantId, Guid departmentId, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<TenantMembership?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public void Add(TenantMembership membership) => throw new NotSupportedException();
         public void Update(TenantMembership membership) => throw new NotSupportedException();

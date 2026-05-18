@@ -454,6 +454,7 @@ public sealed class PaymentReadQueriesTests
         public Task<IReadOnlyList<TenantMembershipSummary>> GetByTenantIdAsync(Guid idTenant, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<bool> ExistsAsync(Guid accountId, Guid idTenant, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<bool> ExistsOwnerByAccountIdAsync(Guid accountId, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<bool> HasActiveMembersInDepartmentAsync(Guid tenantId, Guid departmentId, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<TenantMembership?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public void Add(TenantMembership membership) => throw new NotSupportedException();
         public void Update(TenantMembership membership) => throw new NotSupportedException();
@@ -487,6 +488,10 @@ public sealed class PaymentReadQueriesTests
         public Task<DepartmentSummary?> GetDefaultByTenantIdAsync(Guid idTenant, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<IReadOnlyList<DepartmentSummary>> GetByTenantIdAsync(Guid idTenant, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<Department?> GetEntityByIdAsync(Guid id, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<IReadOnlyList<(Guid Id, Guid? ParentId)>> GetParentMapAsync(Guid tenantId, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<bool> HasActiveChildrenAsync(Guid parentId, Guid tenantId, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<bool> NameExistsAsync(Guid tenantId, string name, Guid? excludeDepartmentId = null, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<Department?> GetEntityByIdIncludingInactiveAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public void Add(Department department) => throw new NotSupportedException();
         public void Update(Department department) => throw new NotSupportedException();
         public void Remove(Department department) => throw new NotSupportedException();

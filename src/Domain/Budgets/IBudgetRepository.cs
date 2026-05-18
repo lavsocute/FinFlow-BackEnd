@@ -27,6 +27,13 @@ public interface IBudgetRepository
     Task<bool> ExistsAsync(Guid tenantId, Guid departmentId, int month, int year, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// True if any ACTIVE budget exists for the given department in the
+    /// tenant. Used by deactivate-department pre-check to prevent dangling
+    /// budgets.
+    /// </summary>
+    Task<bool> HasActiveBudgetsForDepartmentAsync(Guid tenantId, Guid departmentId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Recompute the absolute spent total for a (department, month, year) tuple
     /// directly from confirmed expenses. Used by data-migration / admin tools
     /// only — NOT by the lifecycle pipeline (use Budget entity helpers there).

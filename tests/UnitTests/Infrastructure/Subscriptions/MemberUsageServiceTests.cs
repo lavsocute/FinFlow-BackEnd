@@ -291,6 +291,9 @@ public sealed class MemberUsageServiceTests
         public Task<bool> ExistsOwnerByAccountIdAsync(Guid accountId, CancellationToken cancellationToken = default)
             => Task.FromResult(false);
 
+        public Task<bool> HasActiveMembersInDepartmentAsync(Guid tenantId, Guid departmentId, CancellationToken cancellationToken = default)
+            => Task.FromResult(false);
+
         public Task<TenantMembership?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
             => Task.FromResult<TenantMembership?>(null);
 

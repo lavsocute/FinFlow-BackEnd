@@ -16,3 +16,21 @@ public sealed record DepartmentActivatedDomainEvent(Guid DepartmentId) : IDomain
 {
     public DateTime OccurredOn { get; } = DateTime.UtcNow;
 }
+
+public sealed record DepartmentRenamedDomainEvent(
+    Guid DepartmentId,
+    Guid IdTenant,
+    string OldName,
+    string NewName) : IDomainEvent
+{
+    public DateTime OccurredOn { get; } = DateTime.UtcNow;
+}
+
+public sealed record DepartmentParentChangedDomainEvent(
+    Guid DepartmentId,
+    Guid IdTenant,
+    Guid? OldParentId,
+    Guid? NewParentId) : IDomainEvent
+{
+    public DateTime OccurredOn { get; } = DateTime.UtcNow;
+}

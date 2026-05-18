@@ -66,6 +66,15 @@ internal sealed class TenantMembershipRepository : ITenantMembershipRepository
             .IgnoreQueryFilters()
             .AnyAsync(m => m.AccountId == accountId && m.IsOwner, cancellationToken);
 
+    public Task<bool> HasActiveMembersInDepartmentAsync(Guid tenantId, Guid departmentId, CancellationToken cancellationToken = default) =>
+        _dbContext.Set<TenantMembership>()
+            .AsNoTracking()
+            .AnyAsync(
+                m => m.IdTenant == tenantId
+                    && m.DepartmentId == departmentId
+                    && m.IsActive,
+                cancellationToken);
+
     public async Task<TenantMembership?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _dbContext.Set<TenantMembership>().FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
 

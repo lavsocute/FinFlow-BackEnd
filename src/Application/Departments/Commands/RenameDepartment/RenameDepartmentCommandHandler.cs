@@ -1,5 +1,4 @@
 using FinFlow.Application.Common;
-using FinFlow.Application.Common.Abstractions;
 using FinFlow.Application.Departments.DTOs;
 using FinFlow.Domain.Abstractions;
 using FinFlow.Domain.Departments;
@@ -26,6 +25,11 @@ public sealed class RenameDepartmentCommandHandler : ICommandHandler<RenameDepar
 
         if (department.IdTenant != request.TenantId)
             return Result.Failure<DepartmentSummaryDto>(DepartmentErrors.NotFound);
+
+        // Same-tenant uniqueness, excluding the current department itself so
+        // a no-op rename to the same trimmed value still passes.
+        if (await _departmentRepository.NameExistsAsync(request.TenantId, request.Name, excludeDepartmentId: department.Id, cancellationToken))
+            return Result.Failure<DepartmentSummaryDto>(DepartmentErrors.DuplicateName);
 
         var renameResult = department.Rename(request.Name);
         if (renameResult.IsFailure)
