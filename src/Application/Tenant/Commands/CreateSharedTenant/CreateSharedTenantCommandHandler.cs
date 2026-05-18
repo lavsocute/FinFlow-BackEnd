@@ -10,6 +10,7 @@ using FinFlow.Domain.Interfaces;
 using FinFlow.Domain.RefreshTokens;
 using FinFlow.Domain.TenantApprovals;
 using FinFlow.Domain.TenantMemberships;
+using FinFlow.Domain.TenantSettings;
 using FinFlow.Domain.Tenants;
 using TenantEntity = FinFlow.Domain.Entities.Tenant;
 
@@ -24,6 +25,7 @@ public sealed class CreateSharedTenantCommandHandler : MediatR.IRequestHandler<C
     private readonly ITenantMembershipRepository _membershipRepository;
     private readonly IDepartmentRepository _departmentRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly ITenantSettingsRepository _tenantSettingsRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ITokenService _tokenService;
     private readonly ICurrentTenant _currentTenant;
@@ -36,6 +38,7 @@ public sealed class CreateSharedTenantCommandHandler : MediatR.IRequestHandler<C
         ITenantMembershipRepository membershipRepository,
         IDepartmentRepository departmentRepository,
         IRefreshTokenRepository refreshTokenRepository,
+        ITenantSettingsRepository tenantSettingsRepository,
         IUnitOfWork unitOfWork,
         ITokenService tokenService,
         ICurrentTenant currentTenant)
@@ -47,6 +50,7 @@ public sealed class CreateSharedTenantCommandHandler : MediatR.IRequestHandler<C
         _membershipRepository = membershipRepository;
         _departmentRepository = departmentRepository;
         _refreshTokenRepository = refreshTokenRepository;
+        _tenantSettingsRepository = tenantSettingsRepository;
         _unitOfWork = unitOfWork;
         _tokenService = tokenService;
         _currentTenant = currentTenant;
@@ -104,6 +108,7 @@ public sealed class CreateSharedTenantCommandHandler : MediatR.IRequestHandler<C
             _departmentRepository.Add(department);
             _membershipRepository.Add(membership);
             _refreshTokenRepository.Add(refreshTokenResult.Value);
+            _tenantSettingsRepository.Add(Domain.Entities.TenantSettings.CreateDefault(tenant.Id));
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 

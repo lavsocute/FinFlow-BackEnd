@@ -7,6 +7,7 @@ using FinFlow.Domain.Expenses;
 using FinFlow.Domain.Interfaces;
 using FinFlow.Domain.TenantApprovals;
 using FinFlow.Domain.TenantMemberships;
+using FinFlow.Domain.TenantSettings;
 using FinFlow.Domain.Tenants;
 using TenantEntity = FinFlow.Domain.Entities.Tenant;
 
@@ -19,6 +20,7 @@ public sealed class ApproveTenantCommandHandler : MediatR.IRequestHandler<Approv
     private readonly ITenantRepository _tenantRepository;
     private readonly ITenantMembershipRepository _membershipRepository;
     private readonly ICategoryRepository _categoryRepository;
+    private readonly ITenantSettingsRepository _tenantSettingsRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public ApproveTenantCommandHandler(
@@ -27,6 +29,7 @@ public sealed class ApproveTenantCommandHandler : MediatR.IRequestHandler<Approv
         ITenantRepository tenantRepository,
         ITenantMembershipRepository membershipRepository,
         ICategoryRepository categoryRepository,
+        ITenantSettingsRepository tenantSettingsRepository,
         IUnitOfWork unitOfWork)
     {
         _currentTenant = currentTenant;
@@ -34,6 +37,7 @@ public sealed class ApproveTenantCommandHandler : MediatR.IRequestHandler<Approv
         _tenantRepository = tenantRepository;
         _membershipRepository = membershipRepository;
         _categoryRepository = categoryRepository;
+        _tenantSettingsRepository = tenantSettingsRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -85,6 +89,7 @@ public sealed class ApproveTenantCommandHandler : MediatR.IRequestHandler<Approv
         _tenantApprovalRequestRepository.Update(approvalRequest);
 
         SeedDefaultCategories(tenant.Id);
+        _tenantSettingsRepository.Add(Domain.Entities.TenantSettings.CreateDefault(tenant.Id));
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

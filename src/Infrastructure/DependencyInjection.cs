@@ -83,6 +83,7 @@ public static class DependencyInjection
         services.AddScoped<IExpenseRepository, ExpenseRepository>();
         services.AddScoped<FinFlow.Domain.ExchangeRates.IExchangeRateRepository, ExchangeRateRepository>();
         services.AddScoped<FinFlow.Domain.Employees.IEmployeeReimbursementProfileRepository, EmployeeReimbursementProfileRepository>();
+        services.AddScoped<FinFlow.Domain.TenantSettings.ITenantSettingsRepository, TenantSettingsRepository>();
         services.AddScoped<FinFlow.Domain.Notifications.INotificationRepository, NotificationRepository>();
         services.AddScoped<FinFlow.Application.Documents.Duplicates.IDuplicateReceiptDetector, Documents.DuplicateReceiptDetector>();
         services.AddScoped<ITenantUsageSnapshotRepository, TenantUsageSnapshotRepository>();
