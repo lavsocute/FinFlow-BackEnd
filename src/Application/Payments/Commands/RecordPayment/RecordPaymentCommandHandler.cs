@@ -3,6 +3,7 @@ using FinFlow.Application.Payments.DTOs;
 using FinFlow.Domain.Abstractions;
 using FinFlow.Domain.Budgets;
 using FinFlow.Domain.Documents;
+using FinFlow.Domain.Employees;
 using FinFlow.Domain.Entities;
 using FinFlow.Domain.Enums;
 using FinFlow.Domain.Expenses;
@@ -18,6 +19,7 @@ internal sealed class RecordPaymentCommandHandler : IRequestHandler<RecordPaymen
     private readonly IReviewedDocumentRepository _documentRepository;
     private readonly IBudgetRepository _budgetRepository;
     private readonly ICategoryRepository _categoryRepository;
+    private readonly IEmployeeReimbursementProfileRepository _profileRepository;
     private readonly ICurrentTenant _currentTenant;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -36,6 +38,7 @@ internal sealed class RecordPaymentCommandHandler : IRequestHandler<RecordPaymen
         IReviewedDocumentRepository documentRepository,
         IBudgetRepository budgetRepository,
         ICategoryRepository categoryRepository,
+        IEmployeeReimbursementProfileRepository profileRepository,
         ICurrentTenant currentTenant,
         IUnitOfWork unitOfWork)
     {
@@ -44,6 +47,7 @@ internal sealed class RecordPaymentCommandHandler : IRequestHandler<RecordPaymen
         _documentRepository = documentRepository;
         _budgetRepository = budgetRepository;
         _categoryRepository = categoryRepository;
+        _profileRepository = profileRepository;
         _currentTenant = currentTenant;
         _unitOfWork = unitOfWork;
     }
@@ -71,6 +75,17 @@ internal sealed class RecordPaymentCommandHandler : IRequestHandler<RecordPaymen
 
         if (!AllowedReimbursementMethods.Contains(paymentMethod))
             return Result.Failure<PaymentResponse>(new Error("Payment.InvalidMethod", $"Payment method '{request.PaymentMethod}' is not supported for employee reimbursement."));
+
+        // BankTransfer requires the employee to have configured their reimbursement
+        // profile (encrypted bank account). Other methods (Cash, Payroll, Other) work
+        // without a profile so accountant can still pay legacy/cash-only employees.
+        if (paymentMethod == PaymentMethod.BankTransfer)
+        {
+            var profile = await _profileRepository.GetByMembershipIdAsync(
+                document.MembershipId, cancellationToken);
+            if (profile is null || !profile.HasBankInfo)
+                return Result.Failure<PaymentResponse>(PaymentErrors.BankInfoMissing);
+        }
 
         // Multi-currency: derive from document. Document carries its native currency
         // and the exchange rate captured at upload/review time. Payment inherits the

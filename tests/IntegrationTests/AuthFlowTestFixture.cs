@@ -311,6 +311,7 @@ internal sealed class AuthFlowTestFixture
     {
         public List<VerificationEmail> VerificationEmails { get; } = new();
         public List<PasswordResetEmail> PasswordResetEmails { get; } = new();
+        public List<(string Email, string Otp)> BankInfoUpdateEmails { get; } = new();
 
         public Task SendVerificationEmailAsync(string email, string verificationLink, string otp, CancellationToken cancellationToken = default)
         {
@@ -321,6 +322,12 @@ internal sealed class AuthFlowTestFixture
         public Task SendPasswordResetEmailAsync(string email, string resetLink, string otp, CancellationToken cancellationToken = default)
         {
             PasswordResetEmails.Add(new PasswordResetEmail(email, resetLink, otp));
+            return Task.CompletedTask;
+        }
+
+        public Task SendBankInfoUpdateOtpAsync(string email, string otp, CancellationToken cancellationToken = default)
+        {
+            BankInfoUpdateEmails.Add((email, otp));
             return Task.CompletedTask;
         }
     }

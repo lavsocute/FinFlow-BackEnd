@@ -15,4 +15,6 @@ public static class EmailChallengeErrors
     public static readonly Error EmailDeliveryFailed = new("EmailChallenge.EmailDeliveryFailed", "Unable to deliver verification email");
     public static readonly Error InvalidToken = new("EmailChallenge.InvalidToken", "The verification token is invalid");
     public static readonly Error InvalidOtp = new("EmailChallenge.InvalidOtp", "The verification code is invalid");
+    public static readonly Error ChallengeNotFound = new("EmailChallenge.NotFound", "The email challenge was not found");
+    public static readonly Error OtpInvalid = new("EmailChallenge.OtpInvalid", "The verification code is invalid");
 }

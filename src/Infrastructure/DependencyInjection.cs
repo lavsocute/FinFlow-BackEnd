@@ -82,6 +82,7 @@ public static class DependencyInjection
         services.AddScoped<IPaymentRefundRepository, PaymentRefundRepository>();
         services.AddScoped<IExpenseRepository, ExpenseRepository>();
         services.AddScoped<FinFlow.Domain.ExchangeRates.IExchangeRateRepository, ExchangeRateRepository>();
+        services.AddScoped<FinFlow.Domain.Employees.IEmployeeReimbursementProfileRepository, EmployeeReimbursementProfileRepository>();
         services.AddScoped<ITenantUsageSnapshotRepository, TenantUsageSnapshotRepository>();
         services.AddScoped<IMemberUsageSnapshotRepository, MemberUsageSnapshotRepository>();
         services.AddScoped<ITenantUsageService, TenantUsageService>();
@@ -212,6 +213,7 @@ public static class DependencyInjection
         services.AddScoped<IContentModerator, RegexContentModerator>();
         services.AddScoped<IQueryRewriter, NoOpQueryRewriter>();
         services.AddSingleton<ISecretProvider, Secrets.EnvironmentSecretProvider>();
+        services.AddSingleton<Application.Common.Security.IPiiEncryptionService, Security.AesGcmPiiEncryptionService>();
         services.AddScoped<IVectorStore, PgVectorStore>();
         services.AddScoped<IChatService>(sp => sp.GetRequiredService<Application.Chat.Services.ChatService>());
 
