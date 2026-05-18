@@ -61,6 +61,25 @@ internal sealed class SmtpEmailSender : IEmailSender
         return SendAsync(email, subject, body, cancellationToken);
     }
 
+    public Task SendBankInfoUpdateOtpAsync(string email, string otp, CancellationToken cancellationToken = default)
+    {
+        const string subject = "Confirm bank information change";
+
+        var body = $"""
+            FinFlow bank information change request
+
+            Someone requested to change the bank account on your reimbursement profile.
+            If this was you, enter the following OTP to confirm:
+
+            {otp}
+
+            If this was not you, do nothing — the request will expire shortly. Then
+            sign in and review your account security settings.
+            """;
+
+        return SendAsync(email, subject, body, cancellationToken);
+    }
+
     private async Task SendAsync(string toEmail, string subject, string body, CancellationToken cancellationToken)
     {
         ValidateConfiguration();

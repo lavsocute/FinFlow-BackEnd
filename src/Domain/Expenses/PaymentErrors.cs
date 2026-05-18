@@ -19,6 +19,7 @@ public static class PaymentErrors
     public static readonly Error RejectionTypeRequired = new("Payment.RejectionTypeRequired", "Rejection type is required");
     public static readonly Error InvalidExchangeRate = new("Payment.InvalidExchangeRate", "Exchange rate must be greater than zero");
     public static readonly Error SameCurrencyRequiresUnitRate = new("Payment.SameCurrencyRequiresUnitRate", "When payment currency matches base currency, exchange rate must be 1.0");
+    public static readonly Error BankInfoMissing = new("Payment.BankInfoMissing", "Employee has not configured bank account; bank transfer is unavailable. Please ask the employee to update their reimbursement profile or use cash/payroll.");
     public static readonly Error UpdateRequiresPending = new("Payment.UpdateRequiresPending", "Only pending payments can be updated");
     public static readonly Error CancelRequiresPending = new("Payment.CancelRequiresPending", "Only pending payments can be cancelled");
     public static readonly Error CancellationReasonRequired = new("Payment.CancellationReasonRequired", "Cancellation reason is required");

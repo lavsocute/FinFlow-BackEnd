@@ -125,6 +125,7 @@ public sealed class PaymentMutationSemanticsTests
                 DocumentRepository,
                 BudgetRepository,
                 CategoryRepository,
+                new NullReimbursementProfileRepository(),
                 CurrentTenant,
                 UnitOfWork);
 
@@ -250,6 +251,9 @@ public sealed class PaymentMutationSemanticsTests
         public Task<Payment?> GetEntityByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
             Task.FromResult(StoredById.TryGetValue(id, out var payment) ? payment : null);
 
+        public Task<IReadOnlyList<Payment>> GetByIdsAsync(IReadOnlyList<Guid> ids, Guid tenantId, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<Payment>>(StoredById.Values.Where(p => ids.Contains(p.Id) && p.IdTenant == tenantId).ToList());
+
         public void Add(Payment payment)
         {
             AddedPayment = payment;
@@ -322,6 +326,7 @@ public sealed class PaymentMutationSemanticsTests
 
     private sealed class StubReviewedDocumentRepository(ReviewedDocument document) : IReviewedDocumentRepository
     {
+        public Task<IReadOnlyList<ReviewedDocument>> GetByIdsAsync(IReadOnlyList<Guid> ids, Guid tenantId, CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<ReviewedDocument>>(Array.Empty<ReviewedDocument>());
         public void Add(ReviewedDocument document) => throw new NotSupportedException();
         public void Update(ReviewedDocument document) => throw new NotSupportedException();
         public Task<ReviewedDocument?> GetByIdForUpdateAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default) =>
@@ -360,5 +365,24 @@ public sealed class PaymentMutationSemanticsTests
             SaveCalls++;
             return Task.FromResult(1);
         }
+    }
+
+    private sealed class NullReimbursementProfileRepository : FinFlow.Domain.Employees.IEmployeeReimbursementProfileRepository
+    {
+        public Task<FinFlow.Domain.Employees.EmployeeReimbursementProfile?> GetByMembershipIdAsync(Guid membershipId, CancellationToken cancellationToken = default)
+        {
+            // Return a profile with bank info so BankTransfer payments succeed.
+            // Tests for missing-profile behavior live in their own dedicated test class.
+            var profile = FinFlow.Domain.Employees.EmployeeReimbursementProfile.Create(Guid.NewGuid(), membershipId).Value;
+            profile.UpdateBankInfo("VCB", new byte[32], "1234", "STUB HOLDER", null);
+            return Task.FromResult<FinFlow.Domain.Employees.EmployeeReimbursementProfile?>(profile);
+        }
+
+        public Task<FinFlow.Domain.Employees.EmployeeReimbursementProfile?> GetByIdForUpdateAsync(Guid id, Guid tenantId, CancellationToken cancellationToken = default)
+            => Task.FromResult<FinFlow.Domain.Employees.EmployeeReimbursementProfile?>(null);
+
+        public Task<IReadOnlyList<FinFlow.Domain.Employees.EmployeeReimbursementProfile>> GetByMembershipIdsAsync(IReadOnlyList<Guid> membershipIds, CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<FinFlow.Domain.Employees.EmployeeReimbursementProfile>>(Array.Empty<FinFlow.Domain.Employees.EmployeeReimbursementProfile>());
+        public void Add(FinFlow.Domain.Employees.EmployeeReimbursementProfile profile) { }
+        public void Update(FinFlow.Domain.Employees.EmployeeReimbursementProfile profile) { }
     }
 }

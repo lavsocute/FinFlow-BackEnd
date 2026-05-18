@@ -3,5 +3,6 @@ namespace FinFlow.Domain.Enums;
 public enum EmailChallengePurpose
 {
     VerifyEmail = 1,
-    ResetPassword = 2
+    ResetPassword = 2,
+    UpdateBankInfo = 3
 }

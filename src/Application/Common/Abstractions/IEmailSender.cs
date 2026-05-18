@@ -4,4 +4,5 @@ public interface IEmailSender
 {
     Task SendVerificationEmailAsync(string email, string verificationLink, string otp, CancellationToken cancellationToken = default);
     Task SendPasswordResetEmailAsync(string email, string resetLink, string otp, CancellationToken cancellationToken = default);
+    Task SendBankInfoUpdateOtpAsync(string email, string otp, CancellationToken cancellationToken = default);
 }

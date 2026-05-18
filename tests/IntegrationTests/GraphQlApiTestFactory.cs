@@ -605,6 +605,7 @@ internal sealed class GraphQlApiTestFactory : WebApplicationFactory<Program>
     {
         public List<(string Email, string VerificationLink, string Otp)> VerificationEmails { get; } = new();
         public List<(string Email, string ResetLink, string Otp)> PasswordResetEmails { get; } = new();
+        public List<(string Email, string Otp)> BankInfoUpdateEmails { get; } = new();
 
         public Task SendVerificationEmailAsync(string email, string verificationLink, string otp, CancellationToken cancellationToken = default)
         {
@@ -615,6 +616,12 @@ internal sealed class GraphQlApiTestFactory : WebApplicationFactory<Program>
         public Task SendPasswordResetEmailAsync(string email, string resetLink, string otp, CancellationToken cancellationToken = default)
         {
             PasswordResetEmails.Add((email, resetLink, otp));
+            return Task.CompletedTask;
+        }
+
+        public Task SendBankInfoUpdateOtpAsync(string email, string otp, CancellationToken cancellationToken = default)
+        {
+            BankInfoUpdateEmails.Add((email, otp));
             return Task.CompletedTask;
         }
     }

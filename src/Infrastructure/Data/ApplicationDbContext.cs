@@ -58,6 +58,7 @@ public class ApplicationDbContext : DbContext, IUnitOfWork
     public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
     public DbSet<FinFlow.Domain.ExchangeRates.ExchangeRateHistory> ExchangeRateHistory => Set<FinFlow.Domain.ExchangeRates.ExchangeRateHistory>();
+    public DbSet<FinFlow.Domain.Employees.EmployeeReimbursementProfile> EmployeeReimbursementProfiles => Set<FinFlow.Domain.Employees.EmployeeReimbursementProfile>();
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -282,6 +283,9 @@ public class ApplicationDbContext : DbContext, IUnitOfWork
             e.IsActive && (_currentTenant.IsSuperAdmin || ((Guid?)e.IdTenant == _currentTenant.Id)));
 
         builder.Entity<DocumentChunk>().HasQueryFilter(e =>
+            _currentTenant.IsSuperAdmin || ((Guid?)e.IdTenant == _currentTenant.Id));
+
+        builder.Entity<FinFlow.Domain.Employees.EmployeeReimbursementProfile>().HasQueryFilter(e =>
             _currentTenant.IsSuperAdmin || ((Guid?)e.IdTenant == _currentTenant.Id));
 
         // Note: ChatMessage does not have IdTenant directly.
