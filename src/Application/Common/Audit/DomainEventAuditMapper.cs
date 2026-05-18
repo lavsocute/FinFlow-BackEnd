@@ -154,6 +154,24 @@ internal sealed class DomainEventAuditMapper : IDomainEventAuditMapper
                     sourceEntityType = e.SourceEntityType
                 }),
 
+            DepartmentRenamedDomainEvent e => CreateLog(
+                "DEPARTMENT_RENAMED", "Department", e.DepartmentId, tenantId, accountId,
+                oldPayload: new { name = e.OldName },
+                payload: new { name = e.NewName }),
+
+            DepartmentParentChangedDomainEvent e => CreateLog(
+                "DEPARTMENT_PARENT_CHANGED", "Department", e.DepartmentId, tenantId, accountId,
+                oldPayload: new { parentId = e.OldParentId },
+                payload: new { parentId = e.NewParentId }),
+
+            DepartmentActivatedDomainEvent e => CreateLog(
+                "DEPARTMENT_ACTIVATED", "Department", e.DepartmentId, tenantId, accountId,
+                payload: new { status = "Active" }),
+
+            DepartmentDeactivatedDomainEvent e => CreateLog(
+                "DEPARTMENT_DEACTIVATED", "Department", e.DepartmentId, tenantId, accountId,
+                payload: new { status = "Inactive" }),
+
             _ => null
         };
     }

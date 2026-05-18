@@ -1,5 +1,4 @@
 using FinFlow.Application.Common;
-using FinFlow.Application.Common.Abstractions;
 using FinFlow.Application.Departments.DTOs;
 using FinFlow.Domain.Abstractions;
 using FinFlow.Domain.Accounts;
@@ -36,12 +35,18 @@ public sealed class GetDepartmentMembersQueryHandler : IQueryHandler<GetDepartme
             .Where(m => m.DepartmentId == request.DepartmentId)
             .ToList();
 
-        var memberDtos = new List<MemberDto>();
+        if (departmentMemberships.Count == 0)
+            return Result.Success<IReadOnlyList<MemberDto>>([]);
 
+        // Batch-load accounts in a single round-trip instead of N+1.
+        var accountIds = departmentMemberships.Select(m => m.AccountId).Distinct().ToList();
+        var accounts = await _accountRepository.GetByIdsAsync(accountIds, cancellationToken);
+        var accountMap = accounts.ToDictionary(a => a.Id);
+
+        var memberDtos = new List<MemberDto>(departmentMemberships.Count);
         foreach (var membership in departmentMemberships)
         {
-            var account = await _accountRepository.GetByIdAsync(membership.AccountId, cancellationToken);
-            if (account is not null)
+            if (accountMap.TryGetValue(membership.AccountId, out var account))
             {
                 memberDtos.Add(new MemberDto(
                     membership.Id,

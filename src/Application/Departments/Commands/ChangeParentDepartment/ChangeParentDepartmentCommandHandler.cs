@@ -1,5 +1,4 @@
 using FinFlow.Application.Common;
-using FinFlow.Application.Common.Abstractions;
 using FinFlow.Application.Departments.DTOs;
 using FinFlow.Domain.Abstractions;
 using FinFlow.Domain.Departments;
@@ -41,6 +40,11 @@ public sealed class ChangeParentDepartmentCommandHandler
                 return Result.Failure<DepartmentSummaryDto>(DepartmentErrors.NotFound);
             if (!parent.IsActive)
                 return Result.Failure<DepartmentSummaryDto>(DepartmentErrors.Inactive);
+
+            // Cycle detection — walk from new-parent up the ancestor chain;
+            // bail out if we ever land on the department being moved.
+            if (await WouldCreateCycleAsync(request.DepartmentId, request.NewParentId.Value, request.TenantId, cancellationToken))
+                return Result.Failure<DepartmentSummaryDto>(DepartmentErrors.CycleDetected);
         }
 
         var changeResult = department.ChangeParent(request.NewParentId);
@@ -55,5 +59,27 @@ public sealed class ChangeParentDepartmentCommandHandler
             department.Name,
             department.ParentId,
             department.IsActive));
+    }
+
+    private async Task<bool> WouldCreateCycleAsync(
+        Guid departmentId,
+        Guid newParentId,
+        Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        if (newParentId == departmentId) return true;
+
+        var parentMap = (await _departmentRepository.GetParentMapAsync(tenantId, cancellationToken))
+            .ToDictionary(x => x.Id, x => x.ParentId);
+
+        var visited = new HashSet<Guid>();
+        Guid? cursor = newParentId;
+        while (cursor.HasValue)
+        {
+            if (cursor.Value == departmentId) return true;
+            if (!visited.Add(cursor.Value)) return true;   // pre-existing cycle data
+            parentMap.TryGetValue(cursor.Value, out cursor);
+        }
+        return false;
     }
 }

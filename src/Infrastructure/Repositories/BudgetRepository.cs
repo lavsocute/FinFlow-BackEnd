@@ -81,6 +81,15 @@ internal sealed class BudgetRepository : IBudgetRepository
                 b.Year == year,
                 cancellationToken);
 
+    public Task<bool> HasActiveBudgetsForDepartmentAsync(Guid tenantId, Guid departmentId, CancellationToken cancellationToken = default) =>
+        _dbContext.Set<Budget>()
+            .AsNoTracking()
+            .AnyAsync(
+                b => b.IdTenant == tenantId
+                    && b.IdDepartment == departmentId
+                    && b.IsActive,
+                cancellationToken);
+
     public Task<decimal> CalculateSpentAmountAsync(Guid tenantId, Guid departmentId, int month, int year, CancellationToken cancellationToken = default) =>
         _dbContext.Set<Expense>()
             .AsNoTracking()

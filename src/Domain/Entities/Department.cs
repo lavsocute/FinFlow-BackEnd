@@ -6,6 +6,8 @@ namespace FinFlow.Domain.Entities;
 
 public sealed class Department : Entity, IMultiTenant, ISoftDeletable
 {
+    private const int MaxNameLength = 100;
+
     private Department(Guid id, string name, Guid idTenant, Guid? parentId)
     {
         Id = id;
@@ -26,30 +28,50 @@ public sealed class Department : Entity, IMultiTenant, ISoftDeletable
 
     public static Result<Department> Create(string name, Guid idTenant, Guid? parentId = null)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return Result.Failure<Department>(DepartmentErrors.NameRequired);
-        if (name.Length > 100)
-            return Result.Failure<Department>(DepartmentErrors.NameTooLong);
         if (idTenant == Guid.Empty)
             return Result.Failure<Department>(DepartmentErrors.TenantRequired);
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure<Department>(DepartmentErrors.NameRequired);
+        var trimmed = name.Trim();
+        if (trimmed.Length > MaxNameLength)
+            return Result.Failure<Department>(DepartmentErrors.NameTooLong);
 
-        var department = new Department(Guid.NewGuid(), name, idTenant, parentId);
+        var department = new Department(Guid.NewGuid(), trimmed, idTenant, parentId);
         department.RaiseDomainEvent(new DepartmentCreatedDomainEvent(department.Id, department.Name, department.IdTenant));
         return department;
     }
 
     public Result Rename(string name)
     {
-        if (string.IsNullOrWhiteSpace(name) || name.Length > 100)
+        if (string.IsNullOrWhiteSpace(name))
             return Result.Failure(DepartmentErrors.NameRequired);
-        Name = name;
+        var trimmed = name.Trim();
+        if (trimmed.Length > MaxNameLength)
+            return Result.Failure(DepartmentErrors.NameTooLong);
+        if (string.Equals(Name, trimmed, StringComparison.Ordinal))
+            return Result.Success();   // idempotent
+
+        var oldName = Name;
+        Name = trimmed;
+        RaiseDomainEvent(new DepartmentRenamedDomainEvent(Id, IdTenant, oldName, Name));
         return Result.Success();
     }
 
+    /// <summary>
+    /// Change the parent in the tree. Cycle detection is enforced at the
+    /// application layer (it needs to query the full ancestor chain). This
+    /// method only blocks the trivial self-loop and applies the change.
+    /// </summary>
     public Result ChangeParent(Guid? parentId)
     {
-        if (parentId == Id) return Result.Failure(DepartmentErrors.CannotBeOwnParent);
+        if (parentId == Id)
+            return Result.Failure(DepartmentErrors.CannotBeOwnParent);
+        if (Nullable.Equals(ParentId, parentId))
+            return Result.Success();   // idempotent
+
+        var oldParentId = ParentId;
         ParentId = parentId;
+        RaiseDomainEvent(new DepartmentParentChangedDomainEvent(Id, IdTenant, oldParentId, parentId));
         return Result.Success();
     }
 

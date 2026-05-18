@@ -174,6 +174,7 @@ public class RecordPaymentBankInfoTests
         public Task<IReadOnlyList<BudgetSummary>> GetByTenantIdAsync(Guid idTenant, int? month, int? year, Guid? departmentId, CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<BudgetSummary>>(Array.Empty<BudgetSummary>());
         public Task<bool> ExistsAsync(Guid tenantId, Guid departmentId, int month, int year, CancellationToken cancellationToken = default) => Task.FromResult(false);
         public Task<decimal> CalculateSpentAmountAsync(Guid tenantId, Guid departmentId, int month, int year, CancellationToken cancellationToken = default) => Task.FromResult(0m);
+        public Task<bool> HasActiveBudgetsForDepartmentAsync(Guid tenantId, Guid departmentId, CancellationToken cancellationToken = default) => Task.FromResult(false);
         public void Add(Budget budget) { }
         public void Update(Budget budget) { }
     }

@@ -310,6 +310,7 @@ public sealed class PaymentMutationSemanticsTests
         public Task<IReadOnlyList<BudgetSummary>> GetByTenantIdAsync(Guid idTenant, int? month, int? year, Guid? departmentId, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<bool> ExistsAsync(Guid tenantId, Guid departmentId, int month, int year, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<decimal> CalculateSpentAmountAsync(Guid tenantId, Guid departmentId, int month, int year, CancellationToken cancellationToken = default) => Task.FromResult(0m);
+        public Task<bool> HasActiveBudgetsForDepartmentAsync(Guid tenantId, Guid departmentId, CancellationToken cancellationToken = default) => Task.FromResult(false);
         public void Add(Budget budget) => throw new NotSupportedException();
         public void Update(Budget budget) => throw new NotSupportedException();
     }

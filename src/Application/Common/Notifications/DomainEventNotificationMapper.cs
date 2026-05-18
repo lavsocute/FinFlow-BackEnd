@@ -54,6 +54,7 @@ internal sealed class DomainEventNotificationMapper : IDomainEventNotificationMa
             BudgetExceededDomainEvent e => await BuildBudgetExceeded(e, tenantId.Value, cancellationToken),
             BudgetWarningThresholdReachedDomainEvent e => await BuildBudgetWarning(e, tenantId.Value, cancellationToken),
             BudgetOverrideUsedDomainEvent e => await BuildBudgetOverride(e, tenantId.Value, cancellationToken),
+            DepartmentDeactivatedDomainEvent e => await BuildDepartmentDeactivated(e, tenantId.Value, cancellationToken),
             _ => []
         };
     }
@@ -312,4 +313,23 @@ internal sealed class DomainEventNotificationMapper : IDomainEventNotificationMa
 
     private static string SerializePayload(object payload) =>
         JsonSerializer.Serialize(payload, JsonOptions);
+
+    private async Task<IReadOnlyList<Notification>> BuildDepartmentDeactivated(
+        DepartmentDeactivatedDomainEvent e, Guid tenantId, CancellationToken ct)
+    {
+        var recipients = await ResolveTenantAdmins(tenantId, ct);
+        if (recipients.Count == 0) return [];
+
+        return recipients
+            .Select(membershipId => Notification.Create(
+                tenantId, membershipId,
+                type: "DEPARTMENT_DEACTIVATED",
+                title: "Phòng ban đã bị vô hiệu hóa",
+                body: $"Một phòng ban đã bị deactivate. Kiểm tra nếu cần re-assign nhân sự hoặc ngân sách.",
+                payloadJson: SerializePayload(new { departmentId = e.DepartmentId }),
+                severity: NotificationSeverity.Warning))
+            .Where(r => r.IsSuccess)
+            .Select(r => r.Value)
+            .ToList();
+    }
 }

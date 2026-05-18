@@ -1,5 +1,4 @@
 using FinFlow.Application.Common;
-using FinFlow.Application.Common.Abstractions;
 using FinFlow.Application.Departments.DTOs;
 using FinFlow.Domain.Abstractions;
 using FinFlow.Domain.Departments;
@@ -30,6 +29,12 @@ public sealed class CreateDepartmentCommandHandler : ICommandHandler<CreateDepar
             if (!parentExists.IsActive)
                 return Result.Failure<DepartmentSummaryDto>(DepartmentErrors.Inactive);
         }
+
+        // Application-side uniqueness check. The DB unique index is the
+        // ultimate enforcer (race-safe), this just gives a clean error before
+        // hitting it.
+        if (await _departmentRepository.NameExistsAsync(request.TenantId, request.Name, excludeDepartmentId: null, cancellationToken))
+            return Result.Failure<DepartmentSummaryDto>(DepartmentErrors.DuplicateName);
 
         var createResult = Department.Create(request.Name, request.TenantId, request.ParentId);
         if (createResult.IsFailure)

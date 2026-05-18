@@ -124,6 +124,9 @@ public sealed class GetCurrentWorkspaceQueryHandlerTests
         public Task<bool> ExistsOwnerByAccountIdAsync(Guid accountId, CancellationToken cancellationToken = default)
             => Task.FromResult(_byId is not null && _byId.AccountId == accountId && _byId.IsOwner);
 
+        public Task<bool> HasActiveMembersInDepartmentAsync(Guid tenantId, Guid departmentId, CancellationToken cancellationToken = default)
+            => Task.FromResult(false);
+
         public Task<FinFlow.Domain.Entities.TenantMembership?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
             => Task.FromResult<FinFlow.Domain.Entities.TenantMembership?>(null);
 

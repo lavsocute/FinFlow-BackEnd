@@ -1,4 +1,5 @@
 using FinFlow.Api.GraphQL.Auth;
+using FinFlow.Application.Departments.Commands.ActivateDepartment;
 using FinFlow.Application.Departments.Commands.ChangeParentDepartment;
 using FinFlow.Application.Departments.Commands.CreateDepartment;
 using FinFlow.Application.Departments.Commands.DeactivateDepartment;
@@ -114,6 +115,28 @@ public sealed class DepartmentMutations
         return true;
     }
 
+    [Authorize]
+    public async Task<DepartmentPayload> ActivateDepartmentAsync(
+        ActivateDepartmentInput input,
+        [Service] IMediator mediator,
+        IResolverContext context,
+        CancellationToken cancellationToken)
+    {
+        var scope = EnsureAuthorizedWorkspace(context);
+        var role = EnsureRole(context);
+        if (role != RoleType.TenantAdmin)
+            throw ToGraphQlException(new DomainError("Department.Forbidden", "Only TenantAdmin can activate departments."));
+
+        var result = await mediator.Send(
+            new ActivateDepartmentCommand(input.Id, scope.TenantId),
+            cancellationToken);
+
+        if (result.IsFailure)
+            throw ToGraphQlException(result.Error);
+
+        return ToPayload(result.Value);
+    }
+
     private static (Guid TenantId, Guid MembershipId) EnsureAuthorizedWorkspace(IResolverContext context)
     {
         var tenantId = GetRequiredGuidClaim(context, "IdTenant");
@@ -156,3 +179,5 @@ public sealed record RenameDepartmentInput(Guid Id, string Name);
 public sealed record ChangeParentDepartmentInput(Guid Id, Guid? NewParentId);
 
 public sealed record DeactivateDepartmentInput(Guid Id);
+
+public sealed record ActivateDepartmentInput(Guid Id);
